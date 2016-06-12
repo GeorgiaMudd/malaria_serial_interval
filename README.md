@@ -1,7 +1,7 @@
 malaria_serial_interval
 =======================
 
-This repository contains code for generating Figures 1-5 and implementing an interactive calculator for generationa and serial intervals from the following manuscript.
+This repository contains code for generating Figures 1-5 and implementing an interactive calculator for generation and serial intervals from the following manuscript:
 
 Huber JH, Johnston GL, Greenhouse B, Smith DL, Perkins TA. **Quantitative, model-based estimates of variability in the serial interval of _Plasmodium falciparum_ malaria**. *bioRxiv* doi:[TBD](http://biorxiv.org)
 
