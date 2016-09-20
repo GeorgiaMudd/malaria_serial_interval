@@ -1,18 +1,18 @@
-# (c) 2016 John Huber, Alex Perkins
-# jhuber3@nd.edu, taperkins@nd.edu
-# CRAPL v0.1 license - http://matt.might.net/articles/crapl/
-# See README.md in git repository for more info.
-# This code calculates the GT/SI under specific contexts
+#############################################################################################
+## (c) 2016 John Huber, Alex Perkins                                                       ##
+## jhuber3@nd.edu, taperkins@nd.edu                                                        ##
+## CRAPL v0.1 license - http://matt.might.net/articles/crapl/                              ##
+## See README.md in git repository for more info.                                          ##
+## This code calculates the GT/SI under specific epidemiological contexts                  ##
+#############################################################################################
 
-# set working directory 
+## set working directory 
 setwd('../../malaria_serial_interval/code')
 
-# load appropriate packages 
+## load appropriate packages 
+if(!require(pracma)){install.packages('pracma'); library(pracma)}
 
-library(pracma)
-
-# load appropriate data
-
+## load necessary data
 gametocytemia.U = as.matrix(read.csv('../../malaria_serial_interval/data/Gametocytemia.csv',header=F))
 IDP.A = hist(unlist(sapply(1:nrow(gametocytemia.U),function(ii) #Infection to Detection Period (Asymptomatic)
   which(gametocytemia.U[ii,]>20))),breaks=seq(.5,801.5,1),plot=F)$density[1:365]
@@ -22,23 +22,21 @@ GT.T.data = as.matrix(read.csv('../../malaria_serial_interval/data/new_drug_seco
 gamma.shape = c(27.37, 5.38)
 gamma.scale = c(1.73, 15.65)
 
-# normalize data 
-
+## normalize data 
 normalize = function(x){
   x = x / sum(x)
 }
+
 GT.UT.data = normalize(GT.UT.data)
 GT.T.data = normalize(GT.T.data)
 
-# approximate functions for the treated and untreated GT
-
+## approximate functions for the treated and untreated GT
 GT.UT.fun = approxfun(x = 1:863, y = GT.UT.data)
 GT.T.fun = approxfun(x = 1:863, y = GT.T.data)
 
-# calculate the characteristic equation for a specific case history.
-# argument case.history: a vector of 1's and 2's where 1 signifies "treated" or symptomatic" and 2 signifies "untreated" or "asymptomatic"
-# argument SI.status: a boolean that indicates whether the serial interval will be calculated. 
-
+## calculate the characteristic equation for a specific case history.
+## argument case.history: a vector of 1's and 2's where 1 signifies "treated" or symptomatic" and 2 signifies "untreated" or "asymptomatic"
+## argument SI.status: a boolean that indicates whether the serial interval will be calculated. 
 characteristic.equation = function(case.history, SI.status){
   number.cases = length(case.history)
   number.generations = number.cases - 1
@@ -70,7 +68,7 @@ characteristic.equation = function(case.history, SI.status){
       }
     }
     if(case.history[1] == 1 && case.history[number.cases] == 2){
-      serialinterval = rep(0, length(IDP.S) + length(GT.mean) + length(IDP.A))
+      serial.interval = rep(0, length(IDP.S) + length(GT.mean) + length(IDP.A))
       timing = seq(-length(IDP.S)+1, length(GT.mean) + length(IDP.A), 1)
       for(ii in 1:length(IDP.S)){
         for(jj in 1:length(GT.mean)){
@@ -111,29 +109,32 @@ characteristic.equation = function(case.history, SI.status){
     SI.dataframe = data.frame(timing, serial.interval)
     colnames(SI.dataframe) = c("t", "p")
     return(SI.dataframe)
-    #return(serial.interval)
   }
   else
     timing = seq(1,length(GT.mean), 1)
     GT.dataframe = data.frame(timing, GT.mean)
     colnames(GT.dataframe) = c("t", "p")
     return(GT.dataframe)
-    #return(GT.mean)
 }
 
-# function to compute output the GI or SI based on user input. 
-# argument casehistory: vector of 1's and 2's where 1 signifies "treated" or "symptomatic" and 2 signifies "untreated' or "asymptomatic"
-# argument output.type: "Gamma" (Gamma distribution parameters), "NB" (Negative Binomial Parameters), "PDF" (Probability Density Function)
-# argument SI.boolean: boolean which determines whether a serial interval will be calculated. passed to characteristic.equation function
-
+## function to compute output the GI or SI based on user input. 
+## argument casehistory: vector of 1's and 2's where 1 signifies "treated" or "symptomatic" and 2 signifies "untreated' or "asymptomatic"
+## argument output.type: "Gamma" (Gamma distribution parameters), "NB" (Negative Binomial Parameters), "PDF" (Probability Density Function)
+## argument SI.boolean: boolean which determines whether a serial interval will be calculated. passed to characteristic.equation function
 SI.calculator  = function(casehistory, output.type, SI.boolean){
-  # call characteristic.equation function. Returns output based on user input
+  
+  ## check to see that casehistory is a vector of at least 2
+  if(length(casehistory) < 2){
+    stop('casehistory must be a vector of length at least two')
+  }
+  
+  ## call characteristic.equation function. Returns output based on user input
   characteristic.eq = characteristic.equation(case.history = casehistory, SI.status = SI.boolean)
   
-  # normalize vector
+  ## normalize vector
   generated.output = characteristic.eq
   
-  # evaluates by method of least squares. computes gamma parameters shape and scale 
+  ## evaluates by method of least squares. computes gamma parameters shape and scale 
   
   if(output.type == "Gamma"){
     leastsquares.gamma = function(par){
@@ -144,7 +145,7 @@ SI.calculator  = function(casehistory, output.type, SI.boolean){
     generated.output = optim(par = c(5,20), leastsquares.gamma)$par
   }
   
-  #evaluates by method of least squares. computes negative binomial parameters n and probability
+  ## evaluates by method of least squares. computes negative binomial parameters n and probability
   if(output.type == "NB"){
     leastsquares.nbinom = function(par){
       x = min(characteristic.eq$Timing):max(characteristic.eq$Timing)
@@ -156,9 +157,7 @@ SI.calculator  = function(casehistory, output.type, SI.boolean){
     generated.output = exp(optimized$par)
   }
   
-  # returns generated.output. If output.type == "PDF", a vector of densities will be returned
-  # otherwise, generated.output is a set of fitted parameters
+  ## returns generated.output. If output.type == "PDF", a vector of densities will be returned
+  ## otherwise, generated.output is a set of fitted parameters
   generated.output
 }
-
-
