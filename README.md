@@ -3,7 +3,7 @@ malaria_serial_interval
 
 This repository contains code for generating Figures 1-5 and implementing an interactive calculator for generation and serial intervals from the following manuscript:
 
-Huber JH, Johnston GL, Greenhouse B, Smith DL, Perkins TA. (2016) **Quantitative, model-based estimates of variability in the generation and serial intervals of _Plasmodium falciparum_ malaria**. *Malaria Journal* 15:490. doi:[http://malariajournal.biomedcentral.com/articles/10.1186/s12936-016-1537-6](10.1186/s12936-016-1537-)
+Huber JH, Johnston GL, Greenhouse B, Smith DL, Perkins TA. (2016) **Quantitative, model-based estimates of variability in the generation and serial intervals of _Plasmodium falciparum_ malaria**. *Malaria Journal* 15:490. doi:[10.1186/s12936-016-1537-6](http://malariajournal.biomedcentral.com/articles/10.1186/s12936-016-1537-6)
 
 All code contained within this repository is released under the [CRAPL v0.1 License](http://matt.might.net/articles/crapl/).
 
